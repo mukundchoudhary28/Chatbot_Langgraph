@@ -4,3 +4,5 @@ dotenv
 langchain-groq
 streamlit
 langgraph-checkpoint-sqlite
+langchain-tavily
+duckduckgo-search
