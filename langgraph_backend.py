@@ -3,7 +3,8 @@ from typing import TypedDict, Annotated
 from langchain_core.messages import HumanMessage, BaseMessage
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
-from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.checkpoint.sqlite import SqliteSaver
+import sqlite3
 
 load_dotenv()
 
@@ -23,12 +24,16 @@ graph.add_node("chat",chat)
 graph.add_edge(START, "chat")
 graph.add_edge("chat",END)
 
-memory = InMemorySaver()
+conn = sqlite3.connect("chatbot.db", check_same_thread=False)
+memory = SqliteSaver(conn=conn)
 
 chatbot = graph.compile(checkpointer=memory)
 
-# CONFIG = {"configurable":{"thread_id":"1"}}
-# initial_state = {"messages":[HumanMessage(content="Hi")]}
-# response = chatbot.invoke(initial_state, CONFIG)['messages'][-1].content
-# print(response)
+def retrieve_threads():
+    all_threads = set()
+    for checkpoint in memory.list(None):
+        print(checkpoint)
+        all_threads.add(checkpoint.config["configurable"]["thread_id"])
+
+    return list(all_threads)
 
